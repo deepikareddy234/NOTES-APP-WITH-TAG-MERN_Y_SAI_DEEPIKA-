@@ -40,7 +40,7 @@ const Login = () => {
       const res = await axios.post(
         "https://mern-notes-backend-j79q.onrender.com/api/auth/signin",
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true } // ✅ Important for JWT cookie
       );
 
       if (res.data.success === false) {
@@ -49,10 +49,12 @@ const Login = () => {
         return;
       }
 
-      // ✅ Save token to localStorage for add/edit note
-      localStorage.setItem("userInfo", JSON.stringify(res.data));
+      const user = res.data.user;
 
-      dispatch(signInSuccess(res.data.user));
+      // ✅ Save username and id to localStorage
+      localStorage.setItem("userInfo", JSON.stringify(user));
+
+      dispatch(signInSuccess(user));
       toast.success("Logged in successfully");
       navigate("/");
     } catch (error) {

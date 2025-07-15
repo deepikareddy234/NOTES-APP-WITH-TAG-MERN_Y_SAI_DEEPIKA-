@@ -43,32 +43,13 @@ const Signup = () => {
   };
 
   return (
-       <div className="min-h-screen bg-gradient-to-br from-orange-200 via-red-100 to-pink-200 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-200 via-red-100 to-pink-200 flex items-center justify-center px-4">
       <div className="w-full max-w-5xl bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-orange-200">
-
-        {/* Left Panel */}
         <div className="md:w-1/2 bg-orange-50 px-10 py-16 flex flex-col justify-center text-left space-y-5">
-          <h1 className="text-4xl font-extrabold text-orange-600 flex items-center gap-3">
-            📔 Quick Note
-          </h1>
-
-          <p className="text-md text-gray-700">
-            Take control of your day with beautiful notes. Quick Note helps you capture ideas, organize tasks, and stay focused!
-          </p>
-
-          <ul className="text-sm text-gray-600 space-y-2 mt-4">
-            <li>✅ Create, edit & delete notes</li>
-            <li>🔍 Smart search functionality</li>
-            <li>📱 Responsive & mobile-friendly</li>
-            <li>🌍 Access from anywhere</li>
-          </ul>
-
-          <p className="text-xs italic text-gray-500 pt-6">
-            "The shortest pencil is better than the longest memory."
-          </p>
+          <h1 className="text-4xl font-extrabold text-orange-600 flex items-center gap-3">📔 Quick Note</h1>
+          <p className="text-md text-gray-700">Capture, organize, and focus with ease.</p>
         </div>
 
-        {/* Signup Form */}
         <div className="md:w-1/2 px-8 py-12 bg-white">
           <form onSubmit={handleSignUp} className="space-y-6">
             <h2 className="text-2xl font-semibold mb-4">Sign Up</h2>
@@ -80,7 +61,6 @@ const Signup = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-
             <input
               type="email"
               placeholder="Email"
@@ -88,12 +68,10 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-
             <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button
@@ -105,9 +83,7 @@ const Signup = () => {
 
             <p className="text-sm text-center mt-4">
               Already have an account?{" "}
-              <Link to="/login" className="text-orange-600 underline font-medium">
-                Login
-              </Link>
+              <Link to="/login" className="text-orange-600 underline font-medium">Login</Link>
             </p>
           </form>
         </div>
