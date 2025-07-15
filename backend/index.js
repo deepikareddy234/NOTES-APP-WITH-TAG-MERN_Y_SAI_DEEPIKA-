@@ -6,15 +6,13 @@ import cors from "cors";
 
 dotenv.config();
 
+const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI;
 
 mongoose
-  .connect(MONGO_URI)
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.log("❌ MongoDB connection error:", err));
-
-const app = express();
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 app.use(express.json());
 app.use(cookieParser());
@@ -24,18 +22,17 @@ app.use(cors({
   credentials: true,
 }));
 
-// Routes
 import authRouter from "./routes/auth.route.js";
 import noteRouter from "./routes/note.route.js";
 
 app.use("/api/auth", authRouter);
 app.use("/api/note", noteRouter);
 
-// Global Error Handler
+// Global error handler
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
-  return res.status(statusCode).json({ success: false, statusCode, message });
+  res.status(statusCode).json({ success: false, message });
 });
 
 app.listen(PORT, () => {

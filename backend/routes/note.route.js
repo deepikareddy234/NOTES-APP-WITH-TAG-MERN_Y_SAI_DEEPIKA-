@@ -11,7 +11,6 @@ import {
 
 const router = express.Router();
 
-// Protected Routes (all require valid JWT)
 router.post("/add", verifyToken, addNote);
 router.put("/edit/:noteId", verifyToken, editNote);
 router.get("/all", verifyToken, getAllNotes);
@@ -20,4 +19,3 @@ router.put("/update-note-pinned/:noteId", verifyToken, updateNotePinned);
 router.get("/search", verifyToken, searchNote);
 
 export default router;
-
