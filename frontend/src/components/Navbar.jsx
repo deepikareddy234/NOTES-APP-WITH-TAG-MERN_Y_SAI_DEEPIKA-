@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SearchBar from "./SearchBar/SearchBar";
 import ProfileInfo from "./Cards/ProfileInfo";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import {
   signoutFailure,
   signoutStart,
 } from "../redux/user/userSlice";
-import axios from "axios";
+import axios from "../utils/axios"; // ✅ custom axios instance
 
 const Navbar = ({ onSearchNote, handleClearSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,27 +20,25 @@ const Navbar = ({ onSearchNote, handleClearSearch }) => {
   const dispatch = useDispatch();
   const userInfo = useSelector((state) => state.user.currentUser);
 
- const handleInputChange = (e) => {
-  const value = e.target.value;
-  setSearchQuery(value);
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
 
-  if (value.trim() === "") {
-    // ✅ Force full refresh
-    handleClearSearch();
-    return;
-  }
+    if (value.trim() === "") {
+      handleClearSearch();
+      return;
+    }
 
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-  }
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
 
-  const timer = setTimeout(() => {
-    onSearchNote(value);
-  }, 300);
+    const timer = setTimeout(() => {
+      onSearchNote(value);
+    }, 300);
 
-  setDebounceTimer(timer);
-};
-
+    setDebounceTimer(timer);
+  };
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -56,9 +54,8 @@ const Navbar = ({ onSearchNote, handleClearSearch }) => {
   const onLogout = async () => {
     try {
       dispatch(signoutStart());
-      const res = await axios.get("https://mern-notes-backend-j79q.onrender.com/api/auth/signout", {
-        withCredentials: true,
-      });
+
+      const res = await axios.get("/auth/signout"); // ✅ correct endpoint
 
       if (res.data.success === false) {
         dispatch(signoutFailure(res.data.message));
