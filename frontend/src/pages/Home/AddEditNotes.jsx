@@ -1,24 +1,32 @@
-import React, { useState } from "react"
-import { MdClose } from "react-icons/md"
-import TagInput from "../../components/Input/TagInput "
-import axios from "axios"
-import { toast } from "react-toastify"
+import React, { useState } from "react";
+import { MdClose } from "react-icons/md";
+import TagInput from "../../components/Input/TagInput";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
-  const [title, setTitle]   = useState(noteData?.title   || "");
+  const [title, setTitle] = useState(noteData?.title || "");
   const [content, setContent] = useState(noteData?.content || "");
-  const [tags, setTags]     = useState(noteData?.tags    || []);
-  const [error, setError]   = useState(null);
+  const [tags, setTags] = useState(noteData?.tags || []);
+  const [error, setError] = useState(null);
+
+  // ✅ Get token from localStorage
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const token = userInfo?.token;
 
   /* ---------- EDIT NOTE ---------- */
   const editNote = async () => {
     const noteId = noteData._id;
 
     try {
-      const res = await axios.put(                     // ✅ use PUT to match backend
+      const res = await axios.put(
         `https://mern-notes-backend-j79q.onrender.com/api/note/edit/${noteId}`,
         { title, content, tags },
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (res.data.success === false) {
@@ -43,7 +51,11 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
       const res = await axios.post(
         "https://mern-notes-backend-j79q.onrender.com/api/note/add",
         { title, content, tags },
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (res.data.success === false) {
@@ -64,7 +76,7 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
 
   /* ---------- FORM SUBMIT ---------- */
   const handleSubmit = () => {
-    if (!title.trim())   return setError("Please enter the title");
+    if (!title.trim()) return setError("Please enter the title");
     if (!content.trim()) return setError("Please enter the content");
     setError(null);
     type === "edit" ? editNote() : addNewNote();
