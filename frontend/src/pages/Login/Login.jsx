@@ -49,6 +49,9 @@ const Login = () => {
         return;
       }
 
+      // ✅ Save token to localStorage for add/edit note
+      localStorage.setItem("userInfo", JSON.stringify(res.data));
+
       dispatch(signInSuccess(res.data.user));
       toast.success("Logged in successfully");
       navigate("/");
