@@ -56,7 +56,7 @@ const Navbar = ({ onSearchNote, handleClearSearch }) => {
   const onLogout = async () => {
     try {
       dispatch(signoutStart());
-      const res = await axios.get("http://localhost:3000/api/auth/signout", {
+      const res = await axios.get("https://mern-notes-backend-j79q.onrender.com/api/auth/signout", {
         withCredentials: true,
       });
 

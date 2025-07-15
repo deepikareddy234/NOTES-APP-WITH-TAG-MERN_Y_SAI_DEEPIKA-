@@ -23,7 +23,7 @@ const Signup = () => {
     try {
       setError("");
       const res = await axios.post(
-        "http://localhost:3000/api/auth/signup",
+        "https://mern-notes-backend-j79q.onrender.com/api/auth/signup",
         { username: name, email, password },
         { withCredentials: true }
       );
