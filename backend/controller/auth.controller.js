@@ -5,8 +5,8 @@ import { errorHandler } from "../utils/error.js";
 
 // SIGNUP
 export const signup = async (req, res, next) => {
-  const { name, email, password } = req.body;
-  if (!email || !password || !name) {
+  const { username, email, password } = req.body; // ✅ use username
+  if (!email || !password || !username) {
     return next(errorHandler(400, "All fields are required"));
   }
 
@@ -15,7 +15,7 @@ export const signup = async (req, res, next) => {
 
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  const user = new User({ name, email, password: hashedPassword });
+  const user = new User({ username, email, password: hashedPassword }); // ✅ username
 
   await user.save();
 
@@ -42,15 +42,15 @@ export const signin = async (req, res, next) => {
   res
     .cookie("access_token", token, {
       httpOnly: true,
-      sameSite: "None",  // ✅ Required for Vercel + Render
-      secure: true       // ✅ Required for HTTPS
+      sameSite: "None", // ✅ Required for Vercel + Render
+      secure: true,     // ✅ Required for HTTPS
     })
     .status(200)
     .json({
       success: true,
       user: {
         id: user._id,
-        name: user.name,
+        username: user.username, // ✅ renamed
         email: user.email,
       },
     });
