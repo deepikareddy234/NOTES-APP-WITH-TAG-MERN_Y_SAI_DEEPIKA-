@@ -1,20 +1,14 @@
 import axios from "../axios";
 import { persistor } from "../redux/store";
 
-// Intercept responses globally
 axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const status = error?.response?.status;
-
+  (res) => res,
+  async (err) => {
+    const status = err?.response?.status;
     if (status === 401 || status === 403) {
-      // Clear Redux-persist state
-      await persistor.purge();
-
-      // Redirect to login
-      window.location.href = "/login";
+      await persistor.purge(); // ✅ clear Redux-persist state
+      window.location.href = "/login"; // ✅ redirect to login
     }
-
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );

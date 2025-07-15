@@ -8,7 +8,7 @@ import {
   signInStart,
   signInSuccess,
 } from "../../redux/user/userSlice";
-import axios from "axios";
+import axios from "../../axios"; // ✅ using custom axios
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -37,11 +37,10 @@ const Login = () => {
     try {
       dispatch(signInStart());
 
-      const res = await axios.post(
-        "https://mern-notes-backend-j79q.onrender.com/api/auth/signin",
-        { email, password },
-        { withCredentials: true } // ✅ Important for JWT cookie
-      );
+      const res = await axios.post("/api/auth/signin", {
+        email,
+        password,
+      });
 
       if (res.data.success === false) {
         toast.error(res.data.message);
@@ -51,39 +50,35 @@ const Login = () => {
 
       const user = res.data.user;
 
-      // ✅ Save username and id to localStorage
       localStorage.setItem("userInfo", JSON.stringify(user));
 
       dispatch(signInSuccess(user));
       toast.success("Logged in successfully");
       navigate("/");
     } catch (error) {
-      toast.error(error.message);
-      dispatch(signInFailure(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      toast.error(errMsg);
+      dispatch(signInFailure(errMsg));
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-200 via-red-100 to-pink-200 flex items-center justify-center px-4">
       <div className="w-full max-w-5xl bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-orange-200">
-
         {/* Left Panel */}
         <div className="md:w-1/2 bg-orange-50 px-10 py-16 flex flex-col justify-center text-left space-y-5">
           <h1 className="text-4xl font-extrabold text-orange-600 flex items-center gap-3">
             📔 Quick Note
           </h1>
-
           <p className="text-md text-gray-700">
             Take control of your day with beautiful notes. Quick Note helps you capture ideas, organize tasks, and stay focused!
           </p>
-
           <ul className="text-sm text-gray-600 space-y-2 mt-4">
             <li>✅ Create, edit & delete notes</li>
             <li>🔍 Smart search functionality</li>
             <li>📱 Responsive & mobile-friendly</li>
             <li>🌍 Access from anywhere</li>
           </ul>
-
           <p className="text-xs italic text-gray-500 pt-6">
             "The shortest pencil is better than the longest memory."
           </p>
