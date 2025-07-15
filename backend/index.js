@@ -28,7 +28,15 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+
+// ✅ CORS setup for both local and Vercel frontend
+app.use(cors({
+  origin: [
+    "http://localhost:5173", // local dev
+    "https://notes-app-with-tag-mern-y-sai-deepi.vercel.app" // replace with your actual Vercel frontend URL
+  ],
+  credentials: true
+}));
 
 // Routes
 import authRouter from "./routes/auth.route.js";
