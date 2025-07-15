@@ -20,10 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://notes-app-with-tag-mern-y-sai-deepi.vercel.app"
-  ],
+  origin: "https://notes-app-with-tag-mern-y-sai-deepi.vercel.app",
   credentials: true,
 }));
 
