@@ -10,13 +10,11 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
   const [tags, setTags] = useState(noteData?.tags || []);
   const [error, setError] = useState(null);
 
-  // ✅ Get token from localStorage
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  const token = userInfo?.token;
-
   /* ---------- EDIT NOTE ---------- */
   const editNote = async () => {
     const noteId = noteData._id;
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token = userInfo?.token;
 
     try {
       const res = await axios.put(
@@ -47,6 +45,9 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
 
   /* ---------- ADD NOTE ---------- */
   const addNewNote = async () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token = userInfo?.token;
+
     try {
       const res = await axios.post(
         "https://mern-notes-backend-j79q.onrender.com/api/note/add",
