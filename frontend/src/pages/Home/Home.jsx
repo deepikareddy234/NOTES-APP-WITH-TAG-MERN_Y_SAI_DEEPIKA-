@@ -1,4 +1,3 @@
-// Home.jsx
 import React, { useEffect, useState } from "react";
 import NoteCard from "../../components/Cards/NoteCard";
 import { MdAdd } from "react-icons/md";
@@ -7,121 +6,102 @@ import AddEditNotes from "./AddEditNotes";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
-import axios from "axios";
+import api from "../../utils/axios";           // USE central axios
 import { toast } from "react-toastify";
 import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import { TbNotes } from "react-icons/tb";
-// ... [imports remain unchanged]
 
 const Home = () => {
-  const { currentUser } = useSelector((state) => state.user);
-  const [userInfo, setUserInfo] = useState(null);
-  const [allNotes, setAllNotes] = useState([]);
-  const [displayNotes, setDisplayNotes] = useState([]);
-  const [isSearch, setIsSearch] = useState(false);
+  const { currentUser } = useSelector((s) => s.user);
   const navigate = useNavigate();
 
-  const [openAddEditModal, setOpenAddEditModal] = useState({
+  const [allNotes,     setAllNotes]     = useState([]);
+  const [displayNotes, setDisplayNotes] = useState([]);
+  const [isSearch,     setIsSearch]     = useState(false);
+
+  const [modal, setModal] = useState({
     isShown: false,
     type: "add",
     data: null,
   });
 
-  useEffect(() => {
-    if (!currentUser) {
-      navigate("/login");
-    } else {
-      setUserInfo(currentUser?.rest);
-      getAllNotes();
-    }
-  }, []);
-
+  /* ------------------ fetch notes ------------------ */
   const getAllNotes = async () => {
     try {
-      const res = await axios.get("https://mern-notes-backend-j79q.onrender.com/api/note/all", {
-        withCredentials: true,
-      });
+      const res = await api.get("/note/all");
       if (res.data.success === false) return;
-      setAllNotes(res.data.notes);
-      setDisplayNotes(res.data.notes);
-    } catch (error) {
-      console.log(error);
+      setAllNotes(res.data.notes || []);
+      setDisplayNotes(res.data.notes || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load notes");
     }
   };
 
+  /* ------------------ search ------------------ */
   const onSearchNote = async (query) => {
     try {
-      const res = await axios.get("https://mern-notes-backend-j79q.onrender.com/api/note/search", {
-        params: { query },
-        withCredentials: true,
-      });
+      const res = await api.get("/note/search", { params: { query } });
       if (res.data.success === false) {
         toast.error(res.data.message);
         return;
       }
       setIsSearch(true);
-      setDisplayNotes(res.data.notes);
-    } catch (error) {
-      toast.error(error.message);
+      setDisplayNotes(res.data.notes || []);
+    } catch (err) {
+      toast.error(err.message);
     }
   };
 
   const handleClearSearch = () => {
-  setIsSearch(false);
-  getAllNotes(); // ✅ Force full re-fetch to fix wakeup tag glitch
-};
-
-
-  const handleEdit = (noteDetails) => {
-    setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
+    setIsSearch(false);
+    getAllNotes();
   };
 
-  const deleteNote = async (data) => {
-    const noteId = data._id;
+  /* ------------------ note actions ------------------ */
+  const handleEdit = (note) =>
+    setModal({ isShown: true, type: "edit", data: note });
+
+  const deleteNote = async (note) => {
     try {
-      const res = await axios.delete(
-        `https://mern-notes-backend-j79q.onrender.com/api/note/delete/${noteId}`,
-        { withCredentials: true }
-      );
-      if (res.data.success === false) {
-        toast.error(res.data.message);
-        return;
-      }
+      const res = await api.delete(`/note/delete/${note._id}`);
+      if (res.data.success === false) return toast.error(res.data.message);
       toast.success(res.data.message);
       getAllNotes();
-    } catch (error) {
-      toast(error.message);
+    } catch (err) {
+      toast.error(err.message);
     }
   };
 
-  const updateIsPinned = async (noteData) => {
-    const noteId = noteData._id;
+  const togglePin = async (note) => {
     try {
-      const res = await axios.put(
-        `https://mern-notes-backend-j79q.onrender.com/api/note/update-note-pinned/${noteId}`,
-        { isPinned: !noteData.isPinned },
-        { withCredentials: true }
-      );
-      if (res.data.success === false) {
-        toast.error(res.data.message);
-        return;
-      }
-      toast.success(res.data.message);
+      const res = await api.put(`/note/update-note-pinned/${note._id}`, {
+        isPinned: !note.isPinned,
+      });
+      if (res.data.success === false) return toast.error(res.data.message);
       getAllNotes();
-    } catch (error) {
-      console.log(error.message);
+    } catch (err) {
+      toast.error(err.message);
     }
   };
 
-  // ✅ Split notes
-  const pinnedNotes = displayNotes.filter((n) => n.isPinned);
-  const otherNotes = displayNotes.filter((n) => !n.isPinned);
+  /* ------------------ auth guard & first load ------------------ */
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/login");
+    } else {
+      getAllNotes();
+    }
+  }, [currentUser]);
+
+  /* ------------------ split notes ------------------ */
+  const pinned    = displayNotes.filter((n) => n.isPinned);
+  const unpinned  = displayNotes.filter((n) => !n.isPinned);
 
   return (
     <>
       <div className="min-h-screen bg-amber-100">
         <Navbar
-          userInfo={userInfo}
           onSearchNote={onSearchNote}
           handleClearSearch={handleClearSearch}
         />
@@ -130,54 +110,52 @@ const Home = () => {
           {displayNotes.length > 0 && (
             <div className="flex items-center gap-2 mb-6">
               <TbNotes className="text-3xl text-orange-600" />
-              <h2 className="text-2xl font-semibold text-gray-800">Your Notes</h2>
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Your Notes
+              </h2>
             </div>
           )}
 
           {displayNotes.length > 0 ? (
             <>
-              {pinnedNotes.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-blue-700 mb-2">📌 Pinned</h3>
+              {pinned.length > 0 && (
+                <section className="mb-8">
+                  <h3 className="text-lg font-semibold text-blue-700 mb-2">
+                    📌 Pinned
+                  </h3>
                   <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                    {pinnedNotes.map((note) => (
+                    {pinned.map((n) => (
                       <NoteCard
-                        key={note._id}
-                        title={note.title}
-                        date={note.createdAt}
-                        content={note.content}
-                        tags={note.tags}
-                        isPinned={note.isPinned}
-                        onEdit={() => handleEdit(note)}
-                        onDelete={() => deleteNote(note)}
-                        onPinNote={() => updateIsPinned(note)}
+                        key={n._id}
+                        {...n}
+                        onEdit={() => handleEdit(n)}
+                        onDelete={() => deleteNote(n)}
+                        onPinNote={() => togglePin(n)}
                       />
                     ))}
                   </div>
-                </div>
+                </section>
               )}
 
-              {otherNotes.length > 0 && (
-                <div>
-                  {pinnedNotes.length > 0 && (
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">Other Notes</h3>
+              {unpinned.length > 0 && (
+                <section>
+                  {pinned.length > 0 && (
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                      Other Notes
+                    </h3>
                   )}
                   <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                    {otherNotes.map((note) => (
+                    {unpinned.map((n) => (
                       <NoteCard
-                        key={note._id}
-                        title={note.title}
-                        date={note.createdAt}
-                        content={note.content}
-                        tags={note.tags}
-                        isPinned={note.isPinned}
-                        onEdit={() => handleEdit(note)}
-                        onDelete={() => deleteNote(note)}
-                        onPinNote={() => updateIsPinned(note)}
+                        key={n._id}
+                        {...n}
+                        onEdit={() => handleEdit(n)}
+                        onDelete={() => deleteNote(n)}
+                        onPinNote={() => togglePin(n)}
                       />
                     ))}
                   </div>
-                </div>
+                </section>
               )}
             </>
           ) : (
@@ -199,37 +177,30 @@ const Home = () => {
         </main>
 
         <button
-          className="fixed bottom-6 right-6 w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-tr from-orange-400 to-pink-500 hover:scale-105 transition-all duration-300 text-white shadow-lg"
-          onClick={() =>
-            setOpenAddEditModal({ isShown: true, type: "add", data: null })
-          }
+          className="fixed bottom-6 right-6 w-14 h-14 flex items-center justify-center
+                     rounded-full bg-gradient-to-tr from-orange-400 to-pink-500
+                     hover:scale-105 transition-all duration-300 text-white shadow-lg"
+          onClick={() => setModal({ isShown: true, type: "add", data: null })}
           title="Add New Note"
         >
           <MdAdd className="text-3xl" />
         </button>
       </div>
 
+      {/* ------------------ modal ------------------ */}
       <Modal
-        isOpen={openAddEditModal.isShown}
-        onRequestClose={() => {}}
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
-          },
-        }}
-        contentLabel=""
-        className="w-[40%] max-md:w-[60%] max-sm:w-[85%] max-h-[85vh]
-             overflow-y-auto overflow-x-hidden
-             bg-gradient-to-br from-white via-sky-50 to-blue-50
-             rounded-2xl mx-auto mt-14 p-6 border border-blue-100 
-             shadow-xl"
+        isOpen={modal.isShown}
+        onRequestClose={() => setModal({ isShown: false, type: "add", data: null })}
+        overlayClassName="fixed inset-0 bg-black bg-opacity-40 flex items-start justify-center z-50"
+        className="w-[40%] max-md:w-[60%] max-sm:w-[85%] max-h-[85vh] overflow-y-auto
+                   bg-gradient-to-br from-white via-sky-50 to-blue-50 rounded-2xl
+                   p-6 border border-blue-100 shadow-xl mt-14"
+        ariaHideApp={false}
       >
         <AddEditNotes
-          onClose={() =>
-            setOpenAddEditModal({ isShown: false, type: "add", data: null })
-          }
-          noteData={openAddEditModal.data}
-          type={openAddEditModal.type}
+          onClose={() => setModal({ isShown: false, type: "add", data: null })}
+          noteData={modal.data}
+          type={modal.type}
           getAllNotes={getAllNotes}
         />
       </Modal>
@@ -238,4 +209,3 @@ const Home = () => {
 };
 
 export default Home;
-

@@ -1,52 +1,34 @@
-// frontend/src/pages/Home/AddEditNotes.jsx
 import React, { useState } from "react";
 import { MdClose } from "react-icons/md";
-import TagInput from "../../components/Input/TagInput"; // ← relative path
-import api from "../../utils/axios";                    // ← central axios
+import TagInput from "../../components/Input/TagInput";
+import api from "../../utils/axios";
 import { toast } from "react-toastify";
 
 const AddEditNotes = ({ onClose, noteData = {}, type, getAllNotes }) => {
-  const [title, setTitle]   = useState(noteData.title   || "");
+  const [title,   setTitle]   = useState(noteData.title   || "");
   const [content, setContent] = useState(noteData.content || "");
-  const [tags, setTags]     = useState(noteData.tags    || []);
-  const [error, setError]   = useState(null);
+  const [tags,    setTags]    = useState(noteData.tags    || []);
+  const [error,   setError]   = useState(null);
 
-  // ---------- API helpers ----------
-  const editNote = async () => {
+  /* ---------- helpers ---------- */
+  const submitNote = async () => {
     try {
-      const res = await api.put(`/note/edit/${noteData._id}`, {
-        title,
-        content,
-        tags,
-      });
+      const url  = type === "edit" ? `/note/edit/${noteData._id}` : "/note/add";
+      const verb = type === "edit" ? "put" : "post";
+      const res  = await api[verb](url, { title, content, tags });
+
       if (res.data.success === false) {
         setError(res.data.message);
         toast.error(res.data.message);
         return;
       }
-      toast.success("Note updated");
-      getAllNotes();
-      onClose();
-    } catch (err) {
-      toast.error("Update failed");
-      setError(err.message);
-    }
-  };
 
-  const addNewNote = async () => {
-    try {
-      const res = await api.post("/note/add", { title, content, tags });
-      if (res.data.success === false) {
-        setError(res.data.message);
-        toast.error(res.data.message);
-        return;
-      }
-      toast.success("Note added");
-      getAllNotes();
-      onClose();
+      toast.success(type === "edit" ? "Note updated" : "Note added");
+      onClose();        // close FIRST to avoid state race
+      await getAllNotes();
     } catch (err) {
-      toast.error("Add failed");
       setError(err.message);
+      toast.error(type === "edit" ? "Update failed" : "Add failed");
     }
   };
 
@@ -54,52 +36,53 @@ const AddEditNotes = ({ onClose, noteData = {}, type, getAllNotes }) => {
     if (!title.trim())   return setError("Enter a title");
     if (!content.trim()) return setError("Enter content");
     setError(null);
-    type === "edit" ? editNote() : addNewNote();
+    submitNote();
   };
 
   return (
     <div className="relative">
       <button
-        className="w-10 h-10 rounded-full flex items-center justify-center absolute -top-3 -right-3 hover:bg-slate-50"
+        className="w-9 h-9 rounded-full flex items-center justify-center
+                   absolute -top-3 -right-3 bg-slate-50 hover:bg-slate-100"
         onClick={onClose}
       >
-        <MdClose className="text-xl text-slate-400" />
+        <MdClose className="text-xl text-slate-500" />
       </button>
 
       {/* Title */}
-      <div className="flex flex-col gap-2">
-        <label className="input-label text-red-400 uppercase">Title</label>
-        <input
-          type="text"
-          className="text-2xl outline-none bg-blue-50 p-2 rounded shadow-sm"
-          placeholder="Enter your title..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </div>
+      <label className="block text-sm font-semibold text-red-400 uppercase mb-1">
+        Title
+      </label>
+      <input
+        type="text"
+        className="w-full text-2xl bg-blue-50 p-2 rounded shadow-sm outline-none"
+        placeholder="Enter your title..."
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
 
       {/* Content */}
-      <div className="flex flex-col gap-2 mt-4">
-        <label className="input-label text-red-400 uppercase">Content</label>
-        <textarea
-          className="text-sm outline-none bg-blue-100 p-3 rounded shadow-sm resize-y"
-          placeholder="Content..."
-          rows={10}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-      </div>
+      <label className="block text-sm font-semibold text-red-400 uppercase mt-4 mb-1">
+        Content
+      </label>
+      <textarea
+        className="w-full text-sm bg-blue-100 p-3 rounded shadow-sm resize-y outline-none"
+        placeholder="Content..."
+        rows={10}
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+      />
 
       {/* Tags */}
-      <div className="mt-3">
-        <label className="input-label text-red-400 uppercase">Tags</label>
-        <TagInput tags={tags} setTags={setTags} />
-      </div>
+      <label className="block text-sm font-semibold text-red-400 uppercase mt-4 mb-1">
+        Tags
+      </label>
+      <TagInput tags={tags} setTags={setTags} />
 
       {error && <p className="text-red-500 text-xs pt-4">{error}</p>}
 
       <button
-        className="btn-primary font-medium mt-5 p-3"
+        className="btn-primary w-full font-medium mt-6 py-3"
         onClick={handleSubmit}
       >
         {type === "edit" ? "UPDATE" : "ADD"}
