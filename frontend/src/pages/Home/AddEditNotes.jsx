@@ -5,9 +5,9 @@ import api from "../../utils/axios";
 import { toast } from "react-toastify";
 
 const AddEditNotes = ({ onClose, noteData = {}, type, getAllNotes }) => {
-  const [title,   setTitle]   = useState(noteData.title   || "");
-  const [content, setContent] = useState(noteData.content || "");
-  const [tags,    setTags]    = useState(noteData.tags    || []);
+  const [title,   setTitle]   = useState(noteData?.title   || "");
+  const [content, setContent] = useState(noteData?.content || "");
+  const [tags,    setTags]    = useState(noteData?.tags    || []);
   const [error,   setError]   = useState(null);
 
   /* ---------- helpers ---------- */
@@ -24,8 +24,8 @@ const AddEditNotes = ({ onClose, noteData = {}, type, getAllNotes }) => {
       }
 
       toast.success(type === "edit" ? "Note updated" : "Note added");
-      onClose();        // close FIRST to avoid state race
-      await getAllNotes();
+      onClose();              // close modal first
+      await getAllNotes();    // refresh list
     } catch (err) {
       setError(err.message);
       toast.error(type === "edit" ? "Update failed" : "Add failed");

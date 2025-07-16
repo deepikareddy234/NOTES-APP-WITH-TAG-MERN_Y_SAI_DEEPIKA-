@@ -189,21 +189,21 @@ const Home = () => {
 
       {/* ------------------ modal ------------------ */}
       <Modal
-        isOpen={modal.isShown}
-        onRequestClose={() => setModal({ isShown: false, type: "add", data: null })}
-        overlayClassName="fixed inset-0 bg-black bg-opacity-40 flex items-start justify-center z-50"
-        className="w-[40%] max-md:w-[60%] max-sm:w-[85%] max-h-[85vh] overflow-y-auto
-                   bg-gradient-to-br from-white via-sky-50 to-blue-50 rounded-2xl
-                   p-6 border border-blue-100 shadow-xl mt-14"
-        ariaHideApp={false}
-      >
-        <AddEditNotes
-          onClose={() => setModal({ isShown: false, type: "add", data: null })}
-          noteData={modal.data}
-          type={modal.type}
-          getAllNotes={getAllNotes}
-        />
-      </Modal>
+  isOpen={modal.isShown}
+  onRequestClose={() => setModal({ isShown: false, type: "add", data: null })}
+  overlayClassName="fixed inset-0 bg-black bg-opacity-40 flex items-start justify-center z-50"
+  className="w-[40%] max-md:w-[60%] max-sm:w-[85%] max-h-[85vh] overflow-y-auto
+             bg-gradient-to-br from-white via-sky-50 to-blue-50 rounded-2xl p-6
+             border border-blue-100 shadow-xl mt-14"
+  ariaHideApp={false}
+>
+  <AddEditNotes
+    onClose={() => setModal({ isShown: false, type: 'add', data: null })}
+    noteData={modal.data || {}}     // ✅ fallback to empty object
+    type={modal.type}
+    getAllNotes={getAllNotes}
+  />
+</Modal>
     </>
   );
 };
