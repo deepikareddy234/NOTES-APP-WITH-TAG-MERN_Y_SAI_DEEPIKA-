@@ -9,20 +9,21 @@ import {
   signInStart,
   signInSuccess,
 } from "../../redux/user/userSlice";
-import api from "../../utils/axios";          // ← fixed path & name
+import api from "../../utils/axios";       // shared Axios instance
 import { toast } from "react-toastify";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]     = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError]     = useState("");
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    // Simple front‑end validation
     if (!validateEmail(email)) {
       setError("Please enter a valid email address");
       return;
@@ -36,11 +37,9 @@ const Login = () => {
     try {
       dispatch(signInStart());
 
-      // use the custom Axios instance
-      const res = await api.post("/api/auth/signin", {
-        email,
-        password,
-      });
+      // IMPORTANT: api.baseURL already ends with "/api",
+      // so we do NOT prefix the route with /api here
+      const res = await api.post("/auth/signin", { email, password });
 
       if (res.data.success === false) {
         toast.error(res.data.message);
@@ -54,10 +53,10 @@ const Login = () => {
       dispatch(signInSuccess(user));
       toast.success("Logged in successfully");
       navigate("/");
-    } catch (error) {
-      const errMsg = error.response?.data?.message || error.message;
-      toast.error(errMsg);
-      dispatch(signInFailure(errMsg));
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message;
+      toast.error(msg);
+      dispatch(signInFailure(msg));
     }
   };
 
@@ -70,7 +69,8 @@ const Login = () => {
             📔 Quick Note
           </h1>
           <p className="text-md text-gray-700">
-            Take control of your day with beautiful notes. Quick Note helps you capture ideas, organize tasks, and stay focused!
+            Take control of your day with beautiful notes. Quick Note helps you capture ideas,
+            organize tasks, and stay focused!
           </p>
           <ul className="text-sm text-gray-600 space-y-2 mt-4">
             <li>✅ Create, edit & delete notes</li>
@@ -103,7 +103,9 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            {error && <p className="text-red-500 text-sm pt-1 pb-2">{error}</p>}
+            {error && (
+              <p className="text-red-500 text-sm pt-1 pb-2">{error}</p>
+            )}
 
             <button
               type="submit"
@@ -115,7 +117,7 @@ const Login = () => {
             <p className="text-sm text-center mt-6 text-gray-600">
               Not registered yet?{" "}
               <Link
-                to={"/signup"}
+                to="/signup"
                 className="text-orange-600 font-semibold hover:underline"
               >
                 Create an account
