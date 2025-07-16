@@ -3,15 +3,15 @@ import React, { useState } from "react";
 import PasswordInput from "../../components/Input/PasswordInput";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
-import api from "../../utils/axios";              // custom Axios instance
+import api from "../../utils/axios";          // custom Axios instance
 import { toast } from "react-toastify";
 
 const Signup = () => {
   // ------------------------- STATE -------------------------
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError]       = useState("");
 
   const navigate = useNavigate();
 
@@ -19,22 +19,19 @@ const Signup = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    // basic front‑end validation
-    if (!username) return setError("Please enter your username");
+    if (!username)             return setError("Please enter your username");
     if (!validateEmail(email)) return setError("Enter a valid email address");
-    if (!password) return setError("Please enter a password");
+    if (!password)             return setError("Please enter a password");
 
     try {
-      setError(""); // clear any previous error
+      setError(""); // clear previous errors
 
-      // POST to your backend
-      const res = await api.post("/api/auth/signup", {
+      const res = await api.post("/auth/signup", {  // ✅ fixed path
         username,
         email,
         password,
       });
 
-      // backend may respond with { success: false, message: "..." }
       if (res.data.success === false) {
         setError(res.data.message);
         toast.error(res.data.message);
@@ -43,10 +40,10 @@ const Signup = () => {
 
       toast.success("Signup successful!");
       navigate("/login");
-    } catch (error) {
-      const errMsg = error.response?.data?.message || error.message;
-      setError(errMsg);
-      toast.error(errMsg);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message;
+      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -111,10 +108,7 @@ const Signup = () => {
 
             <p className="text-sm text-center mt-4">
               Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-orange-600 underline font-medium"
-              >
+              <Link to="/login" className="text-orange-600 underline font-medium">
                 Login
               </Link>
             </p>
