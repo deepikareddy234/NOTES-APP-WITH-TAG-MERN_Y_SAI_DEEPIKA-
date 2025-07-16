@@ -1,3 +1,4 @@
+// frontend/src/pages/Login/Login.jsx
 import React, { useState } from "react";
 import PasswordInput from "../../components/Input/PasswordInput";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,7 +9,7 @@ import {
   signInStart,
   signInSuccess,
 } from "../../redux/user/userSlice";
-import axios from "../../axios"; // ✅ using custom axios
+import api from "../../utils/axios";          // ← fixed path & name
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -26,18 +27,17 @@ const Login = () => {
       setError("Please enter a valid email address");
       return;
     }
-
     if (!password) {
       setError("Please enter the password");
       return;
     }
-
     setError("");
 
     try {
       dispatch(signInStart());
 
-      const res = await axios.post("/api/auth/signin", {
+      // use the custom Axios instance
+      const res = await api.post("/api/auth/signin", {
         email,
         password,
       });
@@ -49,7 +49,6 @@ const Login = () => {
       }
 
       const user = res.data.user;
-
       localStorage.setItem("userInfo", JSON.stringify(user));
 
       dispatch(signInSuccess(user));

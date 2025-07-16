@@ -1,11 +1,13 @@
+// frontend/src/pages/Signup/Signup.jsx
 import React, { useState } from "react";
 import PasswordInput from "../../components/Input/PasswordInput";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
-import axios from "../../axios"; // ✅ using custom axios
+import api from "../../utils/axios";              // custom Axios instance
 import { toast } from "react-toastify";
 
 const Signup = () => {
+  // ------------------------- STATE -------------------------
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,21 +15,26 @@ const Signup = () => {
 
   const navigate = useNavigate();
 
+  // ----------------------- HANDLERS ------------------------
   const handleSignUp = async (e) => {
     e.preventDefault();
 
+    // basic front‑end validation
     if (!username) return setError("Please enter your username");
     if (!validateEmail(email)) return setError("Enter a valid email address");
     if (!password) return setError("Please enter a password");
 
     try {
-      setError("");
-      const res = await axios.post("/api/auth/signup", {
+      setError(""); // clear any previous error
+
+      // POST to your backend
+      const res = await api.post("/api/auth/signup", {
         username,
         email,
         password,
       });
 
+      // backend may respond with { success: false, message: "..." }
       if (res.data.success === false) {
         setError(res.data.message);
         toast.error(res.data.message);
@@ -43,6 +50,7 @@ const Signup = () => {
     }
   };
 
+  // ------------------------- JSX ---------------------------
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-200 via-red-100 to-pink-200 flex items-center justify-center px-4">
       <div className="w-full max-w-5xl bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-orange-200">
@@ -52,7 +60,8 @@ const Signup = () => {
             📔 Quick Note
           </h1>
           <p className="text-md text-gray-700">
-            Take control of your day with beautiful notes. Quick Note helps you capture ideas, organize tasks, and stay focused!
+            Take control of your day with beautiful notes. Quick Note helps you
+            capture ideas, organize tasks, and stay focused!
           </p>
           <ul className="text-sm text-gray-600 space-y-2 mt-4">
             <li>✅ Create, edit & delete notes</li>
@@ -102,7 +111,10 @@ const Signup = () => {
 
             <p className="text-sm text-center mt-4">
               Already have an account?{" "}
-              <Link to="/login" className="text-orange-600 underline font-medium">
+              <Link
+                to="/login"
+                className="text-orange-600 underline font-medium"
+              >
                 Login
               </Link>
             </p>

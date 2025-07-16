@@ -1,31 +1,25 @@
+// frontend/src/pages/Home/AddEditNotes.jsx
 import React, { useState } from "react";
 import { MdClose } from "react-icons/md";
-import TagInput from "../../components/Input/TagInput";
-import axios from "../../utils/axios"; // ✅ using custom axios
+import TagInput from "@/components/Input/TagInput";   // ✅ alias path
+import api from "@/utils/axios";                      // ✅ custom Axios
 import { toast } from "react-toastify";
 
 const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
-  const [title, setTitle] = useState(noteData?.title || "");
+  const [title, setTitle]   = useState(noteData?.title   || "");
   const [content, setContent] = useState(noteData?.content || "");
-  const [tags, setTags] = useState(noteData?.tags || []);
-  const [error, setError] = useState(null);
+  const [tags, setTags]     = useState(noteData?.tags    || []);
+  const [error, setError]   = useState(null);
 
+  // ------------- API helpers -------------
   const editNote = async () => {
     const noteId = noteData._id;
-
     try {
-      const res = await axios.put(`/note/edit/${noteId}`, {
-        title,
-        content,
-        tags,
-      });
-
+      const res = await api.put(`/note/edit/${noteId}`, { title, content, tags });
       if (res.data.success === false) {
-        setError(res.data.message);
         toast.error(res.data.message);
-        return;
+        return setError(res.data.message);
       }
-
       toast.success("Note updated");
       getAllNotes();
       onClose();
@@ -38,18 +32,11 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
 
   const addNewNote = async () => {
     try {
-      const res = await axios.post("/note/add", {
-        title,
-        content,
-        tags,
-      });
-
+      const res = await api.post("/note/add", { title, content, tags });
       if (res.data.success === false) {
-        setError(res.data.message);
         toast.error(res.data.message);
-        return;
+        return setError(res.data.message);
       }
-
       toast.success("Note added");
       getAllNotes();
       onClose();
@@ -60,13 +47,15 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
     }
   };
 
+  // ------------- Submit handler -------------
   const handleSubmit = () => {
-    if (!title.trim()) return setError("Please enter the title");
+    if (!title.trim())   return setError("Please enter the title");
     if (!content.trim()) return setError("Please enter the content");
     setError(null);
     type === "edit" ? editNote() : addNewNote();
   };
 
+  // ------------- UI -------------
   return (
     <div className="relative">
       <button
