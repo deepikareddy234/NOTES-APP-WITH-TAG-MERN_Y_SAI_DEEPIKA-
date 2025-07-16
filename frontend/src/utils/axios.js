@@ -1,9 +1,14 @@
+// frontend/src/utils/axios.js
 import axios from "axios";
 
-const axiosInstance = axios.create({
-  // ⚠️ If you ever move the backend URL, change ONE place only (env var is even better)
-  baseURL: "https://mern-notes-backend-j79q.onrender.com",
-  withCredentials: true,   // send / receive cookies for auth
+/**
+ * One central Axios instance for the whole app.
+ * NOTE: backend URL already includes `/api` prefix,
+ * so front‑end calls are just "/auth/..." or "/note/..."
+ */
+const api = axios.create({
+  baseURL: "https://mern-notes-backend-j79q.onrender.com/api",
+  withCredentials: true,
 });
 
-export default axiosInstance;
+export default api;
